@@ -19,11 +19,21 @@ impl SudokuMatrix {
     }
 
     pub fn print(&self) {
+        println!("   0 1 2 3 4 5 6 7 8");
         for i in 0..9 {
-            for _i in 0..9 {
-                print!("--");
+            print!("  ");
+            for j in 0..9 {
+                if i% 3 == 0 && j % 3 == 0 {
+                    print!("*-");
+                } else {
+                    print!("--");
+                }
             }
-            print!("-\n|");
+            if i % 3 == 0 {
+                print!("*\n{} |",i);
+            } else {
+                print!("-\n{} |",i);
+            }
             for j in 0..9 {
                 if self.matrix[i][j] != 0 {
                     print!("{}|", self.matrix[i][j]);
@@ -33,10 +43,15 @@ impl SudokuMatrix {
             }
             println!();
         }
-        for _i in 0..9 {
-            print!("--");
+        print!("  ");
+        for j in 0..9 {
+            if j % 3 == 0 {
+                print!("*-");
+            } else {
+                print!("--");
+            }
         }
-        println!("-");
+        println!("*");
     }
 
     pub fn is_complete(&self) -> bool {
