@@ -10,7 +10,7 @@ fn main() {
     mat.print();
     
     // solve steps
-    if solve_sudoku(&mut mat) {
+    if solve_sudoku(&mut mat, false) {
         mat.print();
     } else {
         println!("No solution!");

@@ -3,7 +3,8 @@ use std::collections::HashSet;
 
 #[derive(Debug, Clone)]
 pub struct SudokuSolverState {
-    pub avail_vals: Vec<Vec<HashSet<u8>>>
+    pub avail_vals: Vec<Vec<HashSet<u8>>>,
+    pub print_debug_info: bool
 }
 
 impl SudokuSolverState {
@@ -20,7 +21,8 @@ impl SudokuSolverState {
             }
         }
         SudokuSolverState {
-            avail_vals
+            avail_vals,
+            print_debug_info: false
         }
     }
     
@@ -65,7 +67,9 @@ fn solve_sudoku_derive(mat: &mut SudokuMatrix, state: &mut SudokuSolverState) ->
         for c in 0..9 {
             if state.avail_vals[r][c].len() == 1 {
                 let v = state.avail_vals[r][c].iter().next().unwrap();
-                println!("Set pos ({}, {}) to {}", r, c, v);
+                if state.print_debug_info {
+                    println!("Set pos ({}, {}) to {}", r, c, v);
+                }
                 mat.set_value(r, c, *v);
                 state.update_with_new_value(r, c, *v);
                 updated = true;
@@ -78,12 +82,16 @@ fn solve_sudoku_derive(mat: &mut SudokuMatrix, state: &mut SudokuSolverState) ->
 fn solve_sudoku_derive_until_no_change(mat: &mut SudokuMatrix, state: &mut SudokuSolverState) {
     while !mat.is_complete() {
         if solve_sudoku_derive(mat, state) {
-            mat.print();
+            if state.print_debug_info {
+                mat.print();
+            }
         } else {
             break;
         }
         if !mat.is_compatible() {
-            println!("Failed!");
+            if state.print_debug_info {
+                println!("Failed!");
+            }
             break;
         }
     }
@@ -94,12 +102,17 @@ fn solve_sudoku_derive_until_no_change(mat: &mut SudokuMatrix, state: &mut Sudok
  *
  * Return true on success, false on failure.
  */
-pub fn solve_sudoku(mat: &mut SudokuMatrix) -> bool {
-    mat.print();
+pub fn solve_sudoku(mat: &mut SudokuMatrix, print_debug_info: bool) -> bool {
+    if print_debug_info {
+        mat.print();
+    }
     if !mat.is_compatible() {
         return false;
     }
     let mut state = SudokuSolverState::init_state_from_matrix(mat);
+    if print_debug_info {
+        state.print_debug_info = true;
+    }
     solve_sudoku_derive_until_no_change(mat, &mut state);
     if mat.is_complete() {
         return true;
@@ -122,14 +135,16 @@ pub fn solve_sudoku(mat: &mut SudokuMatrix) -> bool {
     }
     if let Some((cr, cc)) = candidate {
         for v in state.avail_vals[cr][cc].iter() {
-            println!("Try set ({}, {}) to {}", cr, cc, v);
+            if state.print_debug_info {
+                println!("Try set ({}, {}) to {}", cr, cc, v);
+            }
             let mut new_mat = mat.clone();
             new_mat.set_value(cr, cc, *v);
-            if solve_sudoku(&mut new_mat) {
+            if solve_sudoku(&mut new_mat, print_debug_info) {
                 *mat = new_mat;
                 return true;
-            } else {
-                println!("Trial failed");
+            } else if state.print_debug_info {
+                    println!("Trial failed");
             }
         }
         false
