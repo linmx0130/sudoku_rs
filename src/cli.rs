@@ -1,6 +1,4 @@
-use crate::matrix::SudokuMatrix;
-use crate::solver::solve_sudoku;
-use crate::generator::create_matrix;
+use sudoku_lib::{SudokuMatrix, solve_sudoku, create_matrix};
 use std::io;
 use std::io::Write;
 

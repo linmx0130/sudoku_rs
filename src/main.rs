@@ -1,8 +1,4 @@
-mod matrix;
-mod solver;
-mod generator;
 mod cli;
-
 use clap::Parser;
 
 #[derive(Parser, Debug)]
