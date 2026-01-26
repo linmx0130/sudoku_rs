@@ -4,12 +4,11 @@ use sudoku_lib::{SudokuMatrix, solve_sudoku, create_matrix};
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
 
 use ratatui::{
-    buffer::Buffer,
     layout::{Rect, Alignment, Constraint, Layout, Spacing},
     style::{Stylize, Color},
-    symbols::{border, merge::MergeStrategy},
-    text::{Line, Text},
-    widgets::{Block, Paragraph, Widget},
+    symbols::merge::MergeStrategy,
+    text::Line,
+    widgets::{Block, Paragraph},
     DefaultTerminal, Frame,
 };
 
@@ -26,15 +25,25 @@ fn generate_valid_matrix(filled: usize) -> SudokuMatrix{
 #[derive(Debug)]
 pub struct App {
     matrix: SudokuMatrix,
+    is_original_matrix: [bool;81],
     cursor_pos: usize,
     exit:bool
 }
 
 impl App {
     pub fn new() -> Self {
-        let mut mat = generate_valid_matrix(25);
+        let mat = generate_valid_matrix(25);
+        let mut is_original_matrix = [false; 81];
+        for i in 0..81 {
+            let x = i / 9 ;
+            let y = i % 9;
+            if mat.get_value(x, y) != 0 {
+                is_original_matrix[i] = true;
+            }
+        }
         App {
             matrix: mat,
+            is_original_matrix,
             cursor_pos: 0,
             exit: false
         }
@@ -54,6 +63,15 @@ impl App {
         self.render_matrix(frame, main_area);
     }
 
+    fn fill_value(&mut self, value: u32) {
+        if self.is_original_matrix[self.cursor_pos] {
+            return;
+        }
+        let r = self.cursor_pos / 9;
+        let c = self.cursor_pos % 9 ;
+        self.matrix.set_value(r, c, value.try_into().unwrap());
+    }
+
     fn handle_events(&mut self) -> io::Result<()> {
         match event::read()? {
             Event::Key(key_event) if key_event.kind == KeyEventKind::Press => {
@@ -67,6 +85,9 @@ impl App {
     fn handle_key_event(&mut self, key_event: KeyEvent) {
         match key_event.code {
             KeyCode::Char('q') => self.exit(),
+            KeyCode::Char(c) if c.is_ascii_digit() => {
+                self.fill_value(c.to_digit(10).unwrap());
+            }
             KeyCode::Left => {
                 if self.cursor_pos % 9 > 0 {
                     self.cursor_pos -= 1;
@@ -150,11 +171,16 @@ impl App {
             } else {
                 format!(" {} ", v)
             };
+            let v_line = if self.is_original_matrix[i] {
+                v_text.bold()
+            } else {
+                v_text.into()
+            };
             let cell_widget = if self.cursor_pos == i {
-                Paragraph::new(Line::from(vec![v_text.bold().bg(Color::DarkGray)]))
+                Paragraph::new(Line::from(vec![v_line.bg(Color::DarkGray)]))
                     .block(Block::bordered().merge_borders(MergeStrategy::Exact))
             } else {
-                Paragraph::new(v_text)
+                Paragraph::new(Line::from(vec![v_line]))
                     .block(Block::bordered().merge_borders(MergeStrategy::Exact))
             };
             frame.render_widget(cell_widget, cell);
