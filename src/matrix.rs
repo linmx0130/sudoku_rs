@@ -1,4 +1,4 @@
-#[derive(Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct SudokuMatrix{
     matrix: [[u8;9];9]
 }
