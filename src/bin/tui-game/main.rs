@@ -1,7 +1,7 @@
 use std::io;
 use sudoku_lib::{SudokuMatrix, solve_sudoku, create_matrix};
 
-use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
+use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 
 use ratatui::{
     layout::{Rect, Alignment, Constraint, Layout, Spacing},
@@ -83,6 +83,13 @@ impl App {
     }
 
     fn handle_key_event(&mut self, key_event: KeyEvent) {
+        if key_event.modifiers.contains(KeyModifiers::CONTROL) {
+            match key_event.code {
+                KeyCode::Char('r') => self.reset_matrix(),
+                _ => {}
+            }
+            return;
+        }
         match key_event.code {
             KeyCode::Char('q') => self.exit(),
             KeyCode::Char(c) if c.is_ascii_digit() => {
@@ -116,6 +123,16 @@ impl App {
     fn exit(&mut self) {
         self.exit = true;
     }
+
+    fn reset_matrix(&mut self) {
+        for i in 0..81 {
+            let r = i / 9;
+            let c = i % 9;
+            if !self.is_original_matrix[i] {
+                self.matrix.set_value(r, c, 0);
+            }
+        }
+    }
     
     // Split the layout into a top row, middle space and a bottom row
     fn calculate_main_layout(&mut self, area: Rect) -> (Rect, Rect, Rect) {
@@ -140,7 +157,9 @@ impl App {
 
     fn render_instruction(frame: &mut Frame, area: Rect) {
         let instructions = Line::from(vec![
-            "Quit ".into(),
+            "Reset ".into(),
+            "<C-R>".blue().bold(),
+            " Quit ".into(),
             "<Q>".blue().bold()
         ]);
         frame.render_widget(
