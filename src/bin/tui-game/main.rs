@@ -59,7 +59,7 @@ impl App {
     fn draw(&mut self, frame: &mut Frame) {
         let (title_area, main_area, bottom_area) = self.calculate_main_layout(frame.area());
         Self::render_title(frame, title_area);
-        Self::render_instruction(frame, bottom_area);
+        self.render_instruction(frame, bottom_area);
         self.render_matrix(frame, main_area);
     }
 
@@ -86,6 +86,7 @@ impl App {
         if key_event.modifiers.contains(KeyModifiers::CONTROL) {
             match key_event.code {
                 KeyCode::Char('r') => self.reset_matrix(),
+                KeyCode::Char('a') => self.solve_matrix(),
                 _ => {}
             }
             return;
@@ -133,6 +134,10 @@ impl App {
             }
         }
     }
+
+    fn solve_matrix(&mut self) {
+        solve_sudoku(&mut self.matrix, false);
+    }
     
     // Split the layout into a top row, middle space and a bottom row
     fn calculate_main_layout(&mut self, area: Rect) -> (Rect, Rect, Rect) {
@@ -140,7 +145,7 @@ impl App {
             [
                 Constraint::Length(1),
                 Constraint::Min(19),
-                Constraint::Length(1)
+                Constraint::Length(2)
             ]
         );
         let [top_row, main, bottom_row] = main_layout.areas(area);
@@ -155,15 +160,22 @@ impl App {
         );
     }
 
-    fn render_instruction(frame: &mut Frame, area: Rect) {
+    fn render_instruction(&self, frame: &mut Frame, area: Rect) {
+        let conflit_label = if self.matrix.is_compatible() {
+            Line::from(vec!["".into()])
+        } else {
+            Line::from(vec!["CONFLICT!".white().bold().bg(Color::Red)])
+        };
         let instructions = Line::from(vec![
             "Reset ".into(),
             "<C-R>".blue().bold(),
+            " Solve ".into(),
+            "<C-A>".blue().bold(),
             " Quit ".into(),
             "<Q>".blue().bold()
         ]);
         frame.render_widget(
-            Paragraph::new(instructions)
+            Paragraph::new(vec![conflit_label, instructions])
                 .alignment(Alignment::Center),
             area
         );
