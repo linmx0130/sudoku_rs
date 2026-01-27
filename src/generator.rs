@@ -1,9 +1,27 @@
 
 use crate::matrix::SudokuMatrix;
-use crate::solver::SudokuSolverState;
+use crate::solver::{solve_sudoku, SudokuSolverState};
 use rand::prelude::*;
+use rand::seq::SliceRandom;
 
 pub fn create_matrix(filled_cnt: usize) -> SudokuMatrix {
+    loop {
+        let mut mat = create_seed_matrix(15);
+        if solve_sudoku(&mut mat, false) {
+            let mut rng = rand::rng();
+            let mut idx: Vec<usize> = (0..81).collect();
+            idx.shuffle(&mut rng);
+            for to_remove in idx.iter().take(81).skip(filled_cnt) {
+                let x = to_remove / 9;
+                let y = to_remove % 9;
+                mat.set_value(x, y, 0);
+            }
+            return mat;
+        }
+    }
+}
+
+fn create_seed_matrix(filled_cnt: usize) -> SudokuMatrix {
     let mut mat = SudokuMatrix::new();
     let mut state = SudokuSolverState::init_state_from_matrix(&mat);
     let mut rng = rand::rng();
@@ -11,6 +29,9 @@ pub fn create_matrix(filled_cnt: usize) -> SudokuMatrix {
         let pid = (rng.random::<u32>() as usize) % (81 - fill_idx);
         if let Some((r, c)) = get_empty_cell_coordinate_by_count(&mat, pid) {
             let avail_vals: Vec<u8> = state.avail_vals[r][c].iter().copied().collect();
+            if avail_vals.is_empty() {
+                continue;
+            }
             let v = avail_vals.choose(&mut rng).unwrap();
             mat.set_value(r, c, *v);
             state.update_with_new_value(r, c, *v);

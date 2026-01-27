@@ -12,16 +12,6 @@ use ratatui::{
     DefaultTerminal, Frame,
 };
 
-fn generate_valid_matrix(filled: usize) -> SudokuMatrix{
-    loop {
-        let mat = create_matrix(filled);
-        let mut mmat = mat.clone();
-        if solve_sudoku(&mut mmat, false) {
-            return mat;
-        }
-    }
-}
-
 #[derive(Debug)]
 pub struct App {
     matrix: SudokuMatrix,
@@ -32,7 +22,7 @@ pub struct App {
 
 impl App {
     pub fn new() -> Self {
-        let mat = generate_valid_matrix(25);
+        let mat = create_matrix(25);
         let mut is_original_matrix = [false; 81];
         for i in 0..81 {
             let x = i / 9 ;
@@ -97,7 +87,7 @@ impl App {
                 self.fill_value(c.to_digit(10).unwrap());
             }
             KeyCode::Left => {
-                if self.cursor_pos % 9 > 0 {
+                if !self.cursor_pos.is_multiple_of(9) {
                     self.cursor_pos -= 1;
                 }
             }
