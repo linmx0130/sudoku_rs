@@ -21,8 +21,8 @@ pub struct App {
 }
 
 impl App {
-    pub fn new() -> Self {
-        let mat = create_matrix(25);
+    pub fn new(filled: usize) -> Self {
+        let mat = create_matrix(filled);
         let mut is_original_matrix = [false; 81];
         for (i, mut_ref) in is_original_matrix.iter_mut().enumerate() {
             let x = i / 9 ;
@@ -211,7 +211,7 @@ impl App {
 
 impl Default for App {
     fn default() -> Self {
-        Self::new()
+        Self::new(25)
     }
 }
 
