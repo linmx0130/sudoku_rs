@@ -151,11 +151,7 @@ impl App {
     }
 
     fn render_instruction(&self, frame: &mut Frame, area: Rect) {
-        let conflit_label = if self.matrix.is_compatible() {
-            Line::from(vec!["".into()])
-        } else {
-            Line::from(vec!["CONFLICT!".white().bold().bg(Color::Red)])
-        };
+        let status_label = self.get_status_text_line();
         let instructions = Line::from(vec![
             "Reset ".into(),
             "<C-R>".blue().bold(),
@@ -165,10 +161,20 @@ impl App {
             "<Q>".blue().bold()
         ]);
         frame.render_widget(
-            Paragraph::new(vec![conflit_label, instructions])
+            Paragraph::new(vec![status_label, instructions])
                 .alignment(Alignment::Center),
             area
         );
+    }
+
+    fn get_status_text_line(&self) -> Line<'_> {
+        if !self.matrix.is_compatible() {
+            Line::from(vec!["CONFLICT!".white().bold().bg(Color::Red)])
+        } else if self.matrix.is_complete() {
+            Line::from(vec!["Congratuations! Game solved!".white().bold().bg(Color::Blue)])
+        } else {
+            Line::from(vec!["".into()])
+        }
     }
 
     fn render_matrix(&self, frame: &mut Frame, area: Rect) {
