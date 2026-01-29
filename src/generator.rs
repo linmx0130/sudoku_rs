@@ -4,6 +4,16 @@ use crate::solver::{solve_sudoku, SudokuSolverState};
 use rand::prelude::*;
 use rand::seq::SliceRandom;
 
+ /**
+ * Generate a valid, solable Sudoku matrix with a specified number of filled cells.
+ *
+ * # Arguments
+ * * `filled_cnt` - The number of cells to remain filled in the returned matrix.
+ *
+ * # Returns
+ * A SudokuMatrix with exactly `filled_cnt` cells filled with valid values.
+ * There must be at least one solution for this matrix.
+ */
 pub fn create_matrix(filled_cnt: usize) -> SudokuMatrix {
     loop {
         let mut mat = create_seed_matrix(15);

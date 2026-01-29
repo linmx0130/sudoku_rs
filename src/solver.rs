@@ -1,6 +1,12 @@
 use crate::matrix::SudokuMatrix;
 use std::collections::HashSet;
 
+/**
+ * Sudoku solver internal state
+ *
+ * This structure keeps track of the possible values for each cell
+ * during the solving process.
+ */
 #[derive(Debug, Clone)]
 pub struct SudokuSolverState {
     pub avail_vals: Vec<Vec<HashSet<u8>>>,
