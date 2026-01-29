@@ -2,6 +2,8 @@
 
 A Rust-based Sudoku library with an interactive Terminal User Interface (TUI) game.
 
+![Demo video](./docs/sudoku_demo.gif)
+
 ## Quick Start
 
 ### Run the TUI Game
