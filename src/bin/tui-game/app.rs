@@ -171,7 +171,7 @@ impl App {
         if !self.matrix.is_compatible() {
             Line::from(vec!["CONFLICT!".white().bold().bg(Color::Red)])
         } else if self.matrix.is_complete() {
-            Line::from(vec!["Congratuations! Game solved!".white().bold().bg(Color::Blue)])
+            Line::from(vec!["🎉 Congratulations! Game solved! 🎉".white().bold().bg(Color::Blue)])
         } else {
             Line::from(vec!["".into()])
         }
