@@ -1,8 +1,8 @@
 mod app;
 
-use std::io;
 use app::App;
 use clap::Parser;
+use std::io;
 
 #[derive(Parser)]
 #[command(name = "tui-game")]
@@ -13,7 +13,7 @@ struct Cli {
     filled: usize,
 }
 
-fn main() -> io::Result<()>{
+fn main() -> io::Result<()> {
     let cli = Cli::parse();
     ratatui::run(|terminal| App::new(cli.filled).run(terminal))
 }

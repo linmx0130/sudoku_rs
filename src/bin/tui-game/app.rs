@@ -1,16 +1,16 @@
 use std::io;
-use sudoku_lib::{SudokuMatrix, solve_sudoku, create_matrix};
+use sudoku_lib::{SudokuMatrix, create_matrix, solve_sudoku};
 
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 
 use ratatui::{
-    layout::{Rect, Alignment, Constraint, Layout, Spacing},
-    style::{Stylize, Color},
-    buffer::{Buffer},
+    DefaultTerminal, Frame,
+    buffer::Buffer,
+    layout::{Alignment, Constraint, Layout, Rect, Spacing},
+    style::{Color, Stylize},
     symbols::merge::MergeStrategy,
     text::Line,
     widgets::{Block, Paragraph, Widget},
-    DefaultTerminal, Frame,
 };
 
 /**
@@ -19,16 +19,13 @@ use ratatui::{
 #[derive(Debug)]
 pub struct SudokuWidget {
     matrix: SudokuMatrix,
-    is_original_matrix: [bool;81],
+    is_original_matrix: [bool; 81],
     cursor_pos: usize,
 }
 
 impl Widget for &SudokuWidget {
     fn render(self, area: Rect, buf: &mut Buffer) {
-        let centered_area = area.centered(
-            Constraint::Length(37),
-            Constraint::Length(19)
-        );
+        let centered_area = area.centered(Constraint::Length(37), Constraint::Length(19));
         let col_constraints = (0..9).map(|_| Constraint::Length(5));
         let row_constraints = (0..9).map(|_| Constraint::Length(3));
         let horizontal = Layout::horizontal(col_constraints).spacing(Spacing::Overlap(1));
@@ -71,7 +68,7 @@ impl SudokuWidget {
             return;
         }
         let r = self.cursor_pos / 9;
-        let c = self.cursor_pos % 9 ;
+        let c = self.cursor_pos % 9;
         self.matrix.set_value(r, c, value.try_into().unwrap());
     }
 
@@ -101,23 +98,22 @@ impl SudokuWidget {
     }
 
     pub fn move_curosor_up(&mut self) {
-                if self.cursor_pos >= 9 {
-                    self.cursor_pos -= 9;
-                }
-
+        if self.cursor_pos >= 9 {
+            self.cursor_pos -= 9;
+        }
     }
 
     pub fn move_curosor_down(&mut self) {
-                if self.cursor_pos < 72 {
-                    self.cursor_pos += 9;
-                }
+        if self.cursor_pos < 72 {
+            self.cursor_pos += 9;
+        }
     }
 }
 
 #[derive(Debug)]
 pub struct App {
     sudoku: SudokuWidget,
-    exit:bool
+    exit: bool,
 }
 
 impl App {
@@ -125,19 +121,19 @@ impl App {
         let mat = create_matrix(filled);
         let mut is_original_matrix = [false; 81];
         for (i, mut_ref) in is_original_matrix.iter_mut().enumerate() {
-            let x = i / 9 ;
+            let x = i / 9;
             let y = i % 9;
             if mat.get_value(x, y) != 0 {
                 *mut_ref = true;
             }
         }
         App {
-            sudoku: SudokuWidget{
+            sudoku: SudokuWidget {
                 matrix: mat,
                 is_original_matrix,
                 cursor_pos: 0,
             },
-            exit: false
+            exit: false,
         }
     }
     pub fn run(&mut self, terminal: &mut DefaultTerminal) -> io::Result<()> {
@@ -154,8 +150,6 @@ impl App {
         self.render_instruction(frame, bottom_area);
         frame.render_widget(&self.sudoku, main_area);
     }
-
-    
 
     fn handle_events(&mut self) -> io::Result<()> {
         match event::read()? {
@@ -204,25 +198,22 @@ impl App {
     fn solve_matrix(&mut self) {
         solve_sudoku(&mut self.sudoku.matrix, false);
     }
-    
+
     // Split the layout into a top row, middle space and a bottom row
     fn calculate_main_layout(&mut self, area: Rect) -> (Rect, Rect, Rect) {
-        let main_layout = Layout::vertical(
-            [
-                Constraint::Length(1),
-                Constraint::Min(19),
-                Constraint::Length(2)
-            ]
-        );
+        let main_layout = Layout::vertical([
+            Constraint::Length(1),
+            Constraint::Min(19),
+            Constraint::Length(2),
+        ]);
         let [top_row, main, bottom_row] = main_layout.areas(area);
         (top_row, main, bottom_row)
     }
 
     fn render_title(frame: &mut Frame, area: Rect) {
         frame.render_widget(
-            Paragraph::new(" Sudoku ".bold())
-                .alignment(Alignment::Center),
-            area
+            Paragraph::new(" Sudoku ".bold()).alignment(Alignment::Center),
+            area,
         );
     }
 
@@ -234,12 +225,11 @@ impl App {
             " Solve ".into(),
             "<C-A>".blue().bold(),
             " Quit ".into(),
-            "<Q>".blue().bold()
+            "<Q>".blue().bold(),
         ]);
         frame.render_widget(
-            Paragraph::new(vec![status_label, instructions])
-                .alignment(Alignment::Center),
-            area
+            Paragraph::new(vec![status_label, instructions]).alignment(Alignment::Center),
+            area,
         );
     }
 
@@ -247,7 +237,12 @@ impl App {
         if !self.sudoku.matrix.is_compatible() {
             Line::from(vec!["CONFLICT!".white().bold().bg(Color::Red)])
         } else if self.sudoku.matrix.is_complete() {
-            Line::from(vec!["🎉 Congratulations! Game solved! 🎉".white().bold().bg(Color::Blue)])
+            Line::from(vec![
+                "🎉 Congratulations! Game solved! 🎉"
+                    .white()
+                    .bold()
+                    .bg(Color::Blue),
+            ])
         } else {
             Line::from(vec!["".into()])
         }
@@ -259,5 +254,3 @@ impl Default for App {
         Self::new(25)
     }
 }
-
-

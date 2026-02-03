@@ -1,10 +1,9 @@
-
 use crate::matrix::SudokuMatrix;
-use crate::solver::{solve_sudoku, SudokuSolverState};
+use crate::solver::{SudokuSolverState, solve_sudoku};
 use rand::prelude::*;
 use rand::seq::SliceRandom;
 
- /**
+/**
  * Generate a valid, solable Sudoku matrix with a specified number of filled cells.
  *
  * # Arguments
@@ -56,7 +55,7 @@ fn get_empty_cell_coordinate_by_count(mat: &SudokuMatrix, count: usize) -> Optio
         for j in 0..9 {
             if mat.get_value(i, j) == 0 {
                 if count == 0 {
-                    return Some((i, j))
+                    return Some((i, j));
                 } else {
                     count -= 1
                 }

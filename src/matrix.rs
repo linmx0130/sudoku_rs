@@ -2,8 +2,8 @@
 /**
  * Data class to host a sudoku matrix.
  */
-pub struct SudokuMatrix{
-    matrix: [[u8;9];9]
+pub struct SudokuMatrix {
+    matrix: [[u8; 9]; 9],
 }
 
 impl SudokuMatrix {
@@ -12,13 +12,13 @@ impl SudokuMatrix {
      */
     pub fn new() -> Self {
         SudokuMatrix {
-            matrix: [[0u8; 9]; 9]
+            matrix: [[0u8; 9]; 9],
         }
     }
 
     /**
      * Set value on a cell. A value of `0` will clear the cell.
-     * 
+     *
      * # Arguments
      * * `r` row
      * * `c` column
@@ -27,7 +27,7 @@ impl SudokuMatrix {
     pub fn set_value(&mut self, r: usize, c: usize, v: u8) {
         self.matrix[r][c] = v;
     }
-    
+
     /**
      * Get the value on a cell. A value of `0` means the cell is not filled.
      *
@@ -44,16 +44,16 @@ impl SudokuMatrix {
         for i in 0..9 {
             print!("  ");
             for j in 0..9 {
-                if i% 3 == 0 && j % 3 == 0 {
+                if i % 3 == 0 && j % 3 == 0 {
                     print!("*-");
                 } else {
                     print!("--");
                 }
             }
             if i % 3 == 0 {
-                print!("*\n{} |",i);
+                print!("*\n{} |", i);
             } else {
-                print!("-\n{} |",i);
+                print!("-\n{} |", i);
             }
             for j in 0..9 {
                 if self.matrix[i][j] != 0 {
@@ -82,7 +82,7 @@ impl SudokuMatrix {
         for i in 0..9 {
             for j in 0..9 {
                 if self.matrix[i][j] == 0 {
-                    return false
+                    return false;
                 }
             }
         }
@@ -119,7 +119,7 @@ impl SudokuMatrix {
 }
 
 #[cfg(test)]
-mod test{
+mod test {
     use super::*;
 
     #[test]

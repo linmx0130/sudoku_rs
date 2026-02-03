@@ -10,7 +10,7 @@ use std::collections::HashSet;
 #[derive(Debug, Clone)]
 pub struct SudokuSolverState {
     pub avail_vals: Vec<Vec<HashSet<u8>>>,
-    pub print_debug_info: bool
+    pub print_debug_info: bool,
 }
 
 impl SudokuSolverState {
@@ -28,10 +28,10 @@ impl SudokuSolverState {
         }
         SudokuSolverState {
             avail_vals,
-            print_debug_info: false
+            print_debug_info: false,
         }
     }
-    
+
     pub fn init_state_from_matrix(mat: &SudokuMatrix) -> SudokuSolverState {
         // create state
         let mut state = SudokuSolverState::new();
@@ -43,11 +43,12 @@ impl SudokuSolverState {
                 } else {
                     let block_r = r / 3;
                     let block_c = c / 3;
-                    
+
                     for idx in 0..9 {
                         state.avail_vals[r][c].remove(&mat.get_value(r, idx));
                         state.avail_vals[r][c].remove(&mat.get_value(idx, c));
-                        state.avail_vals[r][c].remove(&mat.get_value(block_r * 3 + idx / 3, block_c * 3 + idx % 3));
+                        state.avail_vals[r][c]
+                            .remove(&mat.get_value(block_r * 3 + idx / 3, block_c * 3 + idx % 3));
                     }
                 }
             }
@@ -150,7 +151,7 @@ pub fn solve_sudoku(mat: &mut SudokuMatrix, print_debug_info: bool) -> bool {
                 *mat = new_mat;
                 return true;
             } else if state.print_debug_info {
-                    println!("Trial failed");
+                println!("Trial failed");
             }
         }
         false
@@ -159,4 +160,33 @@ pub fn solve_sudoku(mat: &mut SudokuMatrix, print_debug_info: bool) -> bool {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
 
+    #[test]
+    fn test_init_state_from_matrix() {
+        let mut mat = SudokuMatrix::new();
+        mat.set_value(0, 0, 5);
+        mat.set_value(0, 1, 3);
+        let state = SudokuSolverState::init_state_from_matrix(&mat);
+        assert_eq!(state.avail_vals[0][0].len(), 0);
+        assert!(!state.avail_vals[0][2].contains(&5));
+        assert!(!state.avail_vals[0][2].contains(&3));
+    }
+
+    #[test]
+    fn test_derive_from_state_happy_path() {
+        let mut mat = SudokuMatrix::new();
+        // Fill row 0 with values 1-8, leaving the last cell empty
+        for c in 0..8 {
+            mat.set_value(0, c, (c + 1) as u8);
+        }
+        let mut state = SudokuSolverState::init_state_from_matrix(&mat);
+        // The last cell in row 0 should now be derivable (must be 9)
+        assert!(solve_sudoku_derive(&mut mat, &mut state));
+        assert_eq!(mat.get_value(0, 8), 9);
+        // The state for that cell should now be empty (since it's filled)
+        assert_eq!(state.avail_vals[0][8].len(), 0);
+    }
+}
